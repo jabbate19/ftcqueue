@@ -1,3 +1,19 @@
+terraform {
+  required_version = ">= 0.13.0"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.15.0"
+    }
+  }
+}
+
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
+}
+
 resource "random_password" "defaultmysql" {
   length           = 16
   special          = true
@@ -80,7 +96,7 @@ resource "google_project_iam_member" "api-sqlclient-binding" {
 }
 
 resource "google_cloud_run_service" "api" {
-  name     = "ftc-queue-api"
+  name     = "ftcqueue-api"
   location = var.gcp_region
 
   traffic {
@@ -115,11 +131,11 @@ resource "google_cloud_run_service" "api" {
         }
         env {
           name  = "DISCORD_SERVER_ID"
-          value = var.discord_application_id
+          value = var.discord_server_id
         }
         env {
           name  = "DISCORD_NOTIFICATION_CHANNEL_ID"
-          value = discord_text_channel.notifications.id
+          value = var.discord_notifiation_channel_id
         }
         env {
           name  = "DISCORD_API_ENDPOINT"
@@ -136,7 +152,7 @@ resource "google_cloud_run_service" "api" {
         env {
           name = "SQL_URI"
           value = format(
-            "mysql://%s:%s@/%s?unix_socket=/cloudsql/%s",
+            "mysql+pymysql://%s:%s@/%s?unix_socket=/cloudsql/%s",
             google_sql_user.db-user.name,
             google_sql_user.db-user.password,
             google_sql_database.api-db.name,

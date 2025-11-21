@@ -1,3 +1,18 @@
+terraform {
+  required_version = ">= 0.13.0"
+
+  required_providers {
+    discord = {
+      source  = "Lucky3028/discord"
+      version = "2.2.1"
+    }
+  }
+}
+
+provider "discord" {
+  token = var.discord_token
+}
+
 data "discord_server" "server" {
   server_id = var.discord_server_id
 }
@@ -42,6 +57,7 @@ resource "discord_message" "how_to_get_roles" {
 data "discord_permission" "member" {
   view_channel  = "allow"
   send_messages = "deny"
+  read_message_history = "allow"
 }
 
 resource "discord_role_everyone" "everyone" {

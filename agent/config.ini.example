@@ -3,4 +3,5 @@ host = localhost
 code = compcodehere
 
 [outbound]
-host = anotherhost.com
+host = https://anotherhost.com
+apikey = yourkeyheere

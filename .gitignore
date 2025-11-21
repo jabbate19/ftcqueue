@@ -4,6 +4,7 @@ reversing/
 deploy/.terraform/
 deploy/terraform.tfstate
 deploy/terraform.tfstate.backup
+deploy/.terraform.tfstate.lock.info
 deploy/.terraform.lock.hcl
 notes.txt
 api/.mypy_cache

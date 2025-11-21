@@ -2,7 +2,7 @@ from os import environ as env
 
 DISCORD_TOKEN: str = env.get("DISCORD_TOKEN", "your-discord-token-here")
 DISCORD_APPLICATION_ID: int = int(
-    env.get("DISCORD_APPLICATION_ID", "your-discord-app-id-here")
+    env.get("DISCORD_APPLICATION_ID", "123456789012345678")
 )
 DISCORD_PUBLIC_KEY: str = env.get("DISCORD_PUBLIC_KEY", "your-discord-public-key-here")
 DISCORD_API_ENDPOINT: str = env.get(

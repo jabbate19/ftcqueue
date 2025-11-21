@@ -115,9 +115,26 @@ def create_team_role(team_number: int) -> int:
         headers=get_discord_api_headers(),
     )
     if resp.status_code != 200:
+        logging.error(f"Failed to create role: {resp.status_code} {resp.text}")
         raise Exception("Failed to create role")
     return resp.json()["id"]
 
+def delete_team_role(role_id: int) -> None:
+    """
+    Creates Role on Discord for Given Team Number. Random Color Assigned.
+
+    Returns Role ID.
+    """
+    resp = requests.delete(
+        f"{DISCORD_API_BASE}/guilds/{config.DISCORD_SERVER_ID}/roles/{role_id}",
+        headers=get_discord_api_headers(),
+    )
+    if resp.status_code != 204:
+        if "Unknown Role" in resp.text:
+            logging.warning(f"Role {role_id} already deleted.")
+            return
+        logging.error(f"Failed to delete role: {resp.status_code} {resp.text}")
+        raise Exception("Failed to delete role")
 
 def set_team(session: Session, team_number: int, user_id: int) -> dict[str, Json]:
     team = session.get(Team, team_number)

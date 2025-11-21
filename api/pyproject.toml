@@ -1,6 +1,6 @@
 [project]
 name = "ftc_queueing_api"
-version = "0.1.0"
+version = "0.1.4"
 description = ""
 authors = [
     {name = "Joe Abbate",email = "joe@joeabbate.me"}
@@ -11,7 +11,8 @@ dependencies = [
     "sqlmodel (>=0.0.27,<0.0.28)",
     "requests (>=2.32.5,<3.0.0)",
     "pynacl (>=1.6.1,<2.0.0)",
-    "uvicorn (>=0.38.0,<0.39.0)"
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "pymysql (>=1.1.2,<2.0.0)"
 ]
 
 

@@ -84,3 +84,9 @@ variable "discord_server_id" {
   sensitive   = true
   description = "Discord Server ID"
 }
+
+variable "discord_notifiation_channel_id" {
+  type        = number
+  sensitive   = true
+  description = "Discord Notification ID"
+}
