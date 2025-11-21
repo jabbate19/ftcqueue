@@ -1,0 +1,6 @@
+[inbound]
+host = localhost
+code = compcodehere
+
+[outbound]
+host = anotherhost.com

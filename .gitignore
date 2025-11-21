@@ -1,0 +1,11 @@
+reversing/
+**/__pycache__/
+**/database.db
+deploy/.terraform/
+deploy/terraform.tfstate
+deploy/terraform.tfstate.backup
+deploy/.terraform.lock.hcl
+notes.txt
+api/.mypy_cache
+env.sh
+agent/config.ini
