@@ -119,6 +119,7 @@ def create_team_role(team_number: int) -> int:
         raise Exception("Failed to create role")
     return resp.json()["id"]
 
+
 def delete_team_role(role_id: int) -> None:
     """
     Creates Role on Discord for Given Team Number. Random Color Assigned.
@@ -135,6 +136,7 @@ def delete_team_role(role_id: int) -> None:
             return
         logging.error(f"Failed to delete role: {resp.status_code} {resp.text}")
         raise Exception("Failed to delete role")
+
 
 def set_team(session: Session, team_number: int, user_id: int) -> dict[str, Json]:
     team = session.get(Team, team_number)

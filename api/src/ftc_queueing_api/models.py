@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy import Column, TEXT, BIGINT
 
+
 class DebugLogs(SQLModel, table=True):
     """
     Logs for debugging purposes from agents
@@ -13,6 +14,7 @@ class DebugLogs(SQLModel, table=True):
     event: str
     payload: str = Field(sa_column=Column(TEXT))
     headers: str | None = Field(default_factory=lambda: None, sa_column=Column(TEXT))
+
 
 class MatchData(SQLModel, table=True):
     """
@@ -28,9 +30,11 @@ class MatchData(SQLModel, table=True):
     blue2: int
     has_pinged: bool = Field(default=False)
 
+
 class AgentInitializePayload(BaseModel):
     teams: list[int]
     matches: list[MatchData]
+
 
 class UpdateMatchPayload(BaseModel):
     """
@@ -40,6 +44,7 @@ class UpdateMatchPayload(BaseModel):
     number: int
     shortName: str
     field: int
+
 
 class AgentUpdatePayload(BaseModel):
     """

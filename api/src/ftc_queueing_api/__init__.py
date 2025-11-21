@@ -2,7 +2,14 @@ from fastapi import FastAPI, Depends, HTTPException, Security, Request, Response
 from fastapi.security.api_key import APIKeyHeader
 from starlette.status import HTTP_403_FORBIDDEN
 from sqlmodel import Session, SQLModel, create_engine, select, delete
-from .models import AgentUpdatePayload, DebugLogs, Team, SendMessagePayload, AgentInitializePayload, MatchData
+from .models import (
+    AgentUpdatePayload,
+    DebugLogs,
+    Team,
+    SendMessagePayload,
+    AgentInitializePayload,
+    MatchData,
+)
 import json
 from typing import Any
 from time import sleep
@@ -72,13 +79,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 @app.post("/api/v1/initialize")
-async def initialize(payload: AgentInitializePayload, api_key: str = Depends(get_agent_api_key)):
+async def initialize(
+    payload: AgentInitializePayload, api_key: str = Depends(get_agent_api_key)
+):
     """
     Intakes initial payload from FTC Scoring system agent.
     """
     with Session(engine) as session:
-        session.add(DebugLogs(event="scoring", payload=json.dumps(payload.model_dump(mode='json'))))
+        session.add(
+            DebugLogs(
+                event="scoring", payload=json.dumps(payload.model_dump(mode="json"))
+            )
+        )
         session.commit()
         for team_number in payload.teams:
             team = session.get(Team, team_number)
@@ -90,12 +104,15 @@ async def initialize(payload: AgentInitializePayload, api_key: str = Depends(get
             if result is None:
                 result = match
             for key, value in match.dict(exclude_unset=True).items():
-                setattr(result, key, value) 
+                setattr(result, key, value)
             session.add(result)
         session.commit()
 
+
 @app.post("/api/v1/update")
-async def update(payload: dict[str, Any] = Body(...), api_key: str = Depends(get_agent_api_key)):
+async def update(
+    payload: dict[str, Any] = Body(...), api_key: str = Depends(get_agent_api_key)
+):
     """
     Intakes events from FTC Scoring system websocket. Forwarded by agent.
     """
@@ -105,7 +122,12 @@ async def update(payload: dict[str, Any] = Body(...), api_key: str = Depends(get
     parsed_payload = AgentUpdatePayload(**payload)
     if parsed_payload.updateType == "MATCH_START":
         with Session(engine) as session:
-            matches = session.exec(select(MatchData).where(MatchData.matchNumber >= parsed_payload.payload.number).order_by(MatchData.matchNumber).limit(1+QUEUE_LOOK_FORWARD)).all()
+            matches = session.exec(
+                select(MatchData)
+                .where(MatchData.matchNumber >= parsed_payload.payload.number)
+                .order_by(MatchData.matchNumber)  # type: ignore[arg-type]
+                .limit(1 + QUEUE_LOOK_FORWARD)
+            ).all()
             started_match = matches[0]
             if len(matches) == 1 or started_match.has_pinged:
                 logging.info("No upcoming matches to queue. Skip ping.")
@@ -117,16 +139,19 @@ async def update(payload: dict[str, Any] = Body(...), api_key: str = Depends(get
             all_teams = []
             for match in next_matches:
                 all_teams.extend([match.red1, match.red2, match.blue1, match.blue2])
-            team_data = session.exec(select(Team).where(Team.team_number.in_(all_teams))).all()
-            team_discord_map = {team.team_number: team.discord_role_id for team in team_data}
+            team_data = session.exec(
+                select(Team).where(Team.team_number.in_(all_teams))  # type: ignore[attr-defined]
+            ).all()
+            team_discord_map = {
+                team.team_number: team.discord_role_id for team in team_data
+            }
             messages = []
             for template, match in zip(QUEUE_MESSAGE_TEMPLATES, next_matches):
                 messages.append(
                     template.format(
                         teams=", ".join(
-                            f"<@&{team_discord_map[tn]}>" for tn in [
-                                match.red1, match.red2, match.blue1, match.blue2
-                            ]
+                            f"<@&{team_discord_map[tn]}>"
+                            for tn in [match.red1, match.red2, match.blue1, match.blue2]
                         ),
                         match=match.matchName,
                         field=match.field,
@@ -138,6 +163,7 @@ async def update(payload: dict[str, Any] = Body(...), api_key: str = Depends(get
             session.commit()
     return
 
+
 @app.post("/api/v1/ping")
 async def ping(api_key: str = Depends(get_agent_api_key)):
     """
@@ -147,6 +173,7 @@ async def ping(api_key: str = Depends(get_agent_api_key)):
         session.add(DebugLogs(event="scoring", payload="ping"))
         session.commit()
     return "OK"
+
 
 @app.post("/api/v1/discord")
 async def discord(request: Request, response: Response):
@@ -209,11 +236,12 @@ async def register(payload: list[int], api_key: str = Depends(get_admin_api_key)
         session.commit()
     return {"skipped": skipped, "created": created}
 
+
 @app.post("/api/v1/admin/reset")
 async def reset(api_key: str = Depends(get_admin_api_key)):
     """
     Deletes all teams and matches from Discord and the database.
-    
+
     Could take multiple attempts if Discord rate limits.
     """
     with Session(engine) as session:
@@ -255,9 +283,7 @@ async def debug_send_message(
 
 
 @app.post("/api/v1/diagnostics/agent_ping")
-async def debug_agent_ping(
-    api_key: str = Depends(get_admin_api_key)
-):
+async def debug_agent_ping(api_key: str = Depends(get_admin_api_key)):
     """
     Gets time since last message from scoring system agent
     """
@@ -265,7 +291,7 @@ async def debug_agent_ping(
         statement = (
             select(DebugLogs)
             .where(DebugLogs.event == "scoring")
-            .order_by(DebugLogs.time.desc()) # type: ignore[attr-defined]
+            .order_by(DebugLogs.time.desc())  # type: ignore[attr-defined]
             .limit(1)
         )
         result = session.exec(statement).first()
