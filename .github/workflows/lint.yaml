@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies (in api/)
+        working-directory: ./api
+        run: |
+          poetry install --no-interaction --no-root
+          # If black/mypy aren't in pyproject, uncomment:
+          # poetry run pip install black mypy
+
+      - name: Run Black (check only)
+        working-directory: ./api
+        run: poetry run black --check .
+
+      - name: Run Mypy
+        working-directory: ./api
+        run: poetry run mypy .
